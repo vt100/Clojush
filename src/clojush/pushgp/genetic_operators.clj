@@ -303,16 +303,34 @@ programs encoded by genomes g1 and g2."
   (levenshtein-distance (expressed-program-sequence-from-genome g1 argmap)
                         (expressed-program-sequence-from-genome g2 argmap)))
 
+#_(defn diversifying?
+   "Returns true iff genome g passes the diversification test."
+   [g argmap]
+   (let [delta #(expressed-difference 
+                  g
+                  (produce-child-genome-by-autoconstruction g g false argmap)
+                  argmap)
+         diffs (repeatedly 2 delta)]
+     (and (> (reduce min diffs) 0) ;; diversification threshold set here
+          (> (count (distinct diffs)) 1))))
+
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
-  (let [delta #(expressed-difference 
-                 g
-                 (produce-child-genome-by-autoconstruction g g false argmap)
+  (let [c1 (produce-child-genome-by-autoconstruction g g false argmap)
+        c2 (produce-child-genome-by-autoconstruction g g false argmap)
+        delta #(expressed-difference 
+                 %
+                 (produce-child-genome-by-autoconstruction % % false argmap)
                  argmap)
-        diffs (repeatedly 2 delta)]
-    (and (> (reduce min diffs) 0) ;; diversification threshold set here
-         (> (count (distinct diffs)) 1))))
+        c1-child-diffs (repeatedly 5 #(delta c1))
+        c2-child-diffs (repeatedly 5 #(delta c2))
+        average #(float (/ (reduce + %) (count %)))]
+    (and (> (reduce min c1-child-diffs) 0)
+         (> (reduce min c2-child-diffs) 0)
+         (> (Math/abs (- (average c1-child-diffs)
+                         (average c2-child-diffs)))
+            0.5))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
