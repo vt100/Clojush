@@ -314,23 +314,74 @@ programs encoded by genomes g1 and g2."
      (and (> (reduce min diffs) 0) ;; diversification threshold set here
           (> (count (distinct diffs)) 1))))
 
+;(defn diversifying?
+;  "Returns true iff genome g passes the diversification test."
+;  [g argmap]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false argmap)
+;        c2 (produce-child-genome-by-autoconstruction g g false argmap)
+;        delta #(expressed-difference 
+;                 %
+;                 (produce-child-genome-by-autoconstruction % % false argmap)
+;                 argmap)
+;        c1-child-diffs (repeatedly 10 #(delta c1))
+;        c2-child-diffs (repeatedly 10 #(delta c2))
+;        average #(float (/ (reduce + %) (count %)))]
+;    (and ;(apply distinct? (conj c1-child-diffs 0))
+;         ;(apply distinct? (conj c2-child-diffs 0))
+;         ;(apply distinct? (conj (concat c1-child-diffs c2-child-diffs) 0))
+;         ;(> (reduce min c1-child-diffs) 0)
+;         ;(> (reduce min c2-child-diffs) 0)
+;         #_(> (Math/abs (- (average c1-child-diffs)
+;                          (average c2-child-diffs)))
+;             0.1)
+;         (not (= (into #{} c1-child-diffs)
+;                 (into #{} c2-child-diffs)))
+;         )))
+
+;(defn diversifying?
+;  "Returns true iff genome g passes the diversification test."
+;  [g argmap]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false argmap)
+;        c2 (produce-child-genome-by-autoconstruction g g false argmap)
+;        c1c1 (produce-child-genome-by-autoconstruction c1 c1 false argmap)
+;        c1c2 (produce-child-genome-by-autoconstruction c1 c1 false argmap)
+;        c2c1 (produce-child-genome-by-autoconstruction c2 c2 false argmap)
+;        c2c2 (produce-child-genome-by-autoconstruction c2 c2 false argmap)]
+;    (and (not= (expressed-difference g c1 argmap)
+;               (expressed-difference g c2 argmap))
+;         (not= (expressed-difference c1 c1c1 argmap)
+;               (expressed-difference c1 c1c2 argmap))
+;         (not= (expressed-difference c2 c2c1 argmap)
+;               (expressed-difference c2 c2c2 argmap)))))
+
+;(defn diversifying?
+;  "Returns true iff genome g passes the diversification test."
+;  [g argmap]
+;  (let [c1 (produce-child-genome-by-autoconstruction g g false argmap)
+;        c2 (produce-child-genome-by-autoconstruction g g false argmap)
+;        c1c (produce-child-genome-by-autoconstruction c1 c1 false argmap)
+;        c1cc (produce-child-genome-by-autoconstruction c1c c1c false argmap)
+;        c2c (produce-child-genome-by-autoconstruction c2 c2 false argmap)
+;        c2cc (produce-child-genome-by-autoconstruction c2c c2c false argmap)]
+;    (not= (expressed-difference c1c c1cc argmap)
+;          (expressed-difference c2c c2cc argmap))))
+
 (defn diversifying?
   "Returns true iff genome g passes the diversification test."
   [g argmap]
   (let [c1 (produce-child-genome-by-autoconstruction g g false argmap)
         c2 (produce-child-genome-by-autoconstruction g g false argmap)
-        delta #(expressed-difference 
-                 %
-                 (produce-child-genome-by-autoconstruction % % false argmap)
-                 argmap)
-        c1-child-diffs (repeatedly 5 #(delta c1))
-        c2-child-diffs (repeatedly 5 #(delta c2))
-        average #(float (/ (reduce + %) (count %)))]
-    (and (> (reduce min c1-child-diffs) 0)
-         (> (reduce min c2-child-diffs) 0)
-         (> (Math/abs (- (average c1-child-diffs)
-                         (average c2-child-diffs)))
-            0.5))))
+        c1c1 (produce-child-genome-by-autoconstruction c1 c1 false argmap)
+        c1c2 (produce-child-genome-by-autoconstruction c1 c1 false argmap)
+        c2c1 (produce-child-genome-by-autoconstruction c2 c2 false argmap)
+        c1c1c1 (produce-child-genome-by-autoconstruction c1c1 c1c1 false argmap)
+        c1c2c1 (produce-child-genome-by-autoconstruction c1c2 c1c2 false argmap)]
+    (and (or (not= (expressed-difference c1 c1c1 argmap)
+                   (expressed-difference c2 c2c1 argmap))
+             (not= (expressed-difference c1 c1c2 argmap)
+                   (expressed-difference c2 c2c1 argmap)))
+         (not= (expressed-difference c1c1 c1c1c1 argmap)
+               (expressed-difference c1c2 c1c2c1 argmap)))))
 
 (defn autoconstruction
   "Returns a genome for a child produced either by autoconstruction (executing parent1
