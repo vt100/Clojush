@@ -12,8 +12,11 @@
                  [clojure-csv "2.0.1"]
                  [org.clojure/data.json "0.2.6"]
                  [clj-random "0.1.7"]
-                 ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3 
-                 [org.apache.commons/commons-math3 "3.2"]]
+                 ;; https://mvnrepository.com/artifact/org.apache.commons/commons-math3
+                 [org.apache.commons/commons-math3 "3.2"]
+                 [ici.recorder "0.1.0-SNAPSHOT"]
+                 [proto-repl "0.3.1"]
+                 [proto-repl-sayid "0.1.3"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [org.clojars.benfb/lein-gorilla "0.4.1"]

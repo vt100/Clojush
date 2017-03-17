@@ -1,6 +1,7 @@
 (ns clojush.pushgp.parent-selection
   (:use [clojush random globals util])
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojush.pushgp.record :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; tournament selection
@@ -8,13 +9,13 @@
   "Returns an individual that does the best out of a tournament."
   [pop location {:keys [tournament-size trivial-geography-radius
                         total-error-method]}]
-  (let [tournament-set 
+  (let [tournament-set
         (doall
           (for [_ (range tournament-size)]
             (nth pop
                  (if (zero? trivial-geography-radius)
                    (lrand-int (count pop))
-                   (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2))) 
+                   (mod (+ location (- (lrand-int (+ 1 (* trivial-geography-radius 2)))
                                        trivial-geography-radius))
                         (count pop))))))
         err-fn (case total-error-method
@@ -45,10 +46,10 @@
     pop))
 
 (defn youth-bias
-  "If lexicase-youth-bias is falsy, returns pop. Otherwise, lexicase-youth-bias should 
+  "If lexicase-youth-bias is falsy, returns pop. Otherwise, lexicase-youth-bias should
   be a vector of [pmin pmax] with pmin and pmax both being between 0 and 1 (inclusive)
   with pmin + pmax <= 1.0. Then, with probability pmin, returns individuals in pop
-  with age @min-age; with probability pmax, returns all of pop; with probability 
+  with age @min-age; with probability pmax, returns all of pop; with probability
   (- 1.0 pmin pmax), selects an age cutoff uniformly from those present in the population
   and returns individuals with the cutoff age or lower."
   [pop {:keys [lexicase-youth-bias]}]
@@ -65,21 +66,21 @@
 
 (defn lexicase-selection
   "Returns an individual that does the best on the fitness cases when considered one at a
-  time in random order.  If trivial-geography-radius is non-zero, selection is limited to 
+  time in random order.  If trivial-geography-radius is non-zero, selection is limited to
   parents within +/- r of location"
   [pop location {:keys [trivial-geography-radius] :as argmap}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
         upper (mod (+ location trivial-geography-radius) (count pop))
         popvec (vec pop)
         subpop (youth-bias
-                 (if (zero? trivial-geography-radius) 
+                 (if (zero? trivial-geography-radius)
                    pop
                    (if (< lower upper)
                      (subvec popvec lower (inc upper))
-                     (into (subvec popvec lower (count pop)) 
+                     (into (subvec popvec lower (count pop))
                            (subvec popvec 0 (inc upper)))))
                  argmap)]
-    (loop [survivors (retain-one-individual-per-error-vector 
+    (loop [survivors (retain-one-individual-per-error-vector
                        (possibly-remove-individuals-with-empty-genomes
                          subpop argmap))
            cases (lshuffle (range (count (:errors (first subpop)))))]
@@ -116,12 +117,13 @@
           meta-case-errors (apply map list (map :meta-errors pop))
           all-errors (concat test-case-errors meta-case-errors)
           epsilons (map mad all-errors)]
-      (println "Epsilons for epsilon lexicase:" epsilons)
+      (println "Epsilons for epsilon lexicase:"
+        (r/generation-data! [:epsilons] epsilons))
       (reset! epsilons-for-epsilon-lexicase epsilons))))
 
 (defn epsilon-lexicase-selection
-  "Returns an individual that does within epsilon of the best on the fitness cases when 
-  considered one at a time in random order.  If trivial-geography-radius is non-zero, 
+  "Returns an individual that does within epsilon of the best on the fitness cases when
+  considered one at a time in random order.  If trivial-geography-radius is non-zero,
   selection is limited to parents within +/- r of location"
   [pop location {:keys [trivial-geography-radius epsilon-lexicase-epsilon]}]
   (let [lower (mod (- location trivial-geography-radius) (count pop))
@@ -156,17 +158,17 @@
 ;; elitegroup lexicase selection
 
 (defn build-elitegroups
-  "Builds a sequence that partitions the cases into sub-sequences, with cases 
-   grouped when they produce the same set of elite individuals in the population. 
-   In addition, if group A produces population subset PS(A), and group B 
-   produces population subset PS(B), and PS(A) is a proper subset of PS(B), then 
+  "Builds a sequence that partitions the cases into sub-sequences, with cases
+   grouped when they produce the same set of elite individuals in the population.
+   In addition, if group A produces population subset PS(A), and group B
+   produces population subset PS(B), and PS(A) is a proper subset of PS(B), then
    group B is discarded. "
   [pop-agents]
   (println "Building case elitegroups...")
   (let [pop (retain-one-individual-per-error-vector (map deref pop-agents))
         cases (range (count (:errors (first pop))))
         elites (map (fn [c]
-                      (let [min-error-for-case 
+                      (let [min-error-for-case
                             (apply min (map #(nth % c) (map :errors pop)))]
                         (filter #(== (nth (:errors %) c) min-error-for-case)
                                 pop)))
@@ -273,7 +275,3 @@
                                                                1
                                                                (inc sel-count)))))
     selected))
-
-
-
-

@@ -6,7 +6,8 @@
             [clj-random.core :as random]
             [local-file]
             [clojure.data.csv :as csv]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojush.pushgp.record :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helper functions
@@ -504,7 +505,8 @@
   "Prints the initial report of a PushGP run."
   [{:keys [problem-specific-initial-report] :as push-argmap}]
   (problem-specific-initial-report push-argmap)
-  (println "Registered instructions:" @registered-instructions)
+  (println "Registered instructions:"
+    (r/config-data! [:report :registered-instructions] @registered-instructions))
   (println "Starting PushGP run.")
   (printf "Clojush version = ")
   (try
@@ -514,7 +516,7 @@
           version-number (.substring version-str 1 (count version-str))]
       (if (empty? version-number)
         (throw Exception)
-        (printf (str version-number "\n"))))
+        (printf (str (r/config-data! [:report :version-number] version-number)) "\n")))
     (flush)
     (catch Exception e
            (printf "version number unavailable\n")
@@ -528,6 +530,7 @@
           ;;          been committed already.
           ;;        - GitHub link will only work if commit has been pushed
           ;;          to GitHub.
+          (r/config-data! [:report :git-hash] git-hash)
           (printf (str "Hash of last Git commit = " git-hash "\n"))
           (printf (str "GitHub link = https://github.com/lspector/Clojush/commit/"
                        git-hash
