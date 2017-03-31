@@ -74,7 +74,7 @@
                            (:genome p1) 
                            (produce-child-genome-by-autoconstruction 
                              g (:genome p1) (:genome p2) false argmap)))))
-    :fidorama (case (lrand-int 4)
+    :fidorama (case (lrand-nth [1 2])
                 0 (fn [p1 p2 g]
                     (sequence-similarity g (:genome p1)))
                 1 (fn [p1 p2 g]
@@ -1024,6 +1024,7 @@ be set globally or eliminated in the future."
                                            (:ancestors parent1)))
         :is-random-replacement
         (if use-child false true)))))
+
 
 
 
