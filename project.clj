@@ -3,7 +3,7 @@
                 system implemented in Clojure. See http://pushlanguage.com" 
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha15"]
                  [org.clojars.etosch/cosmos "1.0.0"]
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [org.clojure/math.combinatorics "0.1.1"]
@@ -16,7 +16,8 @@
                  [org.apache.commons/commons-math3 "3.2"]
                  [ici.recorder "0.1.0-SNAPSHOT"]
                  [proto-repl "0.3.1"]
-                 [proto-repl-sayid "0.1.3"]]
+                 [proto-repl-sayid "0.1.3"]
+                 [danlentz/clj-uuid "0.1.7"]]
   :plugins [[lein-codox "0.9.1"]
             [lein-shell "0.5.0"]
             [org.clojars.benfb/lein-gorilla "0.4.1"]

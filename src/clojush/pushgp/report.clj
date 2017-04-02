@@ -309,6 +309,7 @@
            print-edn-logs edn-keys edn-log-filename edn-additional-keys]
            
     :as argmap}]
+  (r/generation-data! [:population] population)
   (println)
   (println ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;")
   (println ";; -*- Report at generation" generation)
@@ -506,7 +507,7 @@
   [{:keys [problem-specific-initial-report] :as push-argmap}]
   (problem-specific-initial-report push-argmap)
   (println "Registered instructions:"
-    (r/config-data! [:report :registered-instructions] @registered-instructions))
+    (r/config-data! [:registered-instructions] @registered-instructions))
   (println "Starting PushGP run.")
   (printf "Clojush version = ")
   (try
@@ -516,7 +517,7 @@
           version-number (.substring version-str 1 (count version-str))]
       (if (empty? version-number)
         (throw Exception)
-        (printf (str (r/config-data! [:report :version-number] version-number)) "\n")))
+        (printf (str (r/config-data! [:version-number] version-number)) "\n")))
     (flush)
     (catch Exception e
            (printf "version number unavailable\n")
@@ -530,7 +531,7 @@
           ;;          been committed already.
           ;;        - GitHub link will only work if commit has been pushed
           ;;          to GitHub.
-          (r/config-data! [:report :git-hash] git-hash)
+          (r/config-data! [:git-hash] git-hash)
           (printf (str "Hash of last Git commit = " git-hash "\n"))
           (printf (str "GitHub link = https://github.com/lspector/Clojush/commit/"
                        git-hash
